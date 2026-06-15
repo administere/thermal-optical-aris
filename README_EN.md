@@ -16,6 +16,8 @@ VCSEL Array → DiSubPc·C70 Thermal Sieve (242°C) → CMOS Detector Array
 
 The key insight: **light serves dual purpose** — it carries Q-encoded signals AND heats the photothermal layer to its quantum coherent beating window (242°C), where DiSubPc·C70 undergoes singlet↔triplet oscillations that modulate refractive index. No external heaters needed.
 
+![Architecture](figures/architecture.png)
+
 ## Six Engineering Questions
 
 | # | Question | Finding | Status |
@@ -29,6 +31,8 @@ The key insight: **light serves dual purpose** — it carries Q-encoded signals 
 
 ## Key Results (D=2048)
 
+![D Scaling Law](figures/d_scaling.png)
+
 | Metric | Value |
 |--------|-------|
 | Pure optical energy per D-dim dot product | **0.6 fJ** (5M× vs H100) |
@@ -37,6 +41,10 @@ The key insight: **light serves dual purpose** — it carries Q-encoded signals 
 | Dot products per second | 41.9 Pops/s |
 | CMOS temperature (50μm gap + cooling) | 107°C |
 | SNR (APD M=20) | 18 dB |
+
+## Energy Efficiency Comparison
+
+![Energy Comparison](figures/energy_comparison.png)
 
 ## Prior Art & Novelty
 
@@ -49,6 +57,8 @@ This work makes the following **first-disclosed** technical contributions:
 3. **First free-space photon reuse in a thermal modulation array** — One photon pulse traverses D modulation points, performing D MAC operations. Photon reuse exists in waveguide delay lines (ReFOCUS, MICRO 2023) but is first proposed in a free-space thermal sieve.
 
 For a detailed prior art analysis with citations, see [PRIOR_ART.md](PRIOR_ART.md).
+
+![Competitive Landscape](figures/radar.png)
 
 ## Honest Assessment
 
