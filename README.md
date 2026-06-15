@@ -1,64 +1,94 @@
-# Thermal-Optical Hybrid Processor — Engineering Validation
+# 热光混合处理器 — 工程验证
 
-> Independent engineering analysis of a thermal-optical hybrid attention processor.
-> Heat is not a problem. Heat is the computation mechanism.
+> 独立工程分析 · 热不是负担, 是计算机制本身.
 
-## What This Is
+## 这是什么
 
-This repository contains my engineering validation of a novel thermal-optical hybrid processor architecture:
+这个仓库是我对一种新型热光混合处理器架构的工程验证:
 
 ```
-VCSEL Array → DiSubPc·C70 Thermal Sieve (242°C) → CMOS Detector Array
-     ↑                    ↑                              ↑
-  Q-encoded        Photothermal Δn               Direct photodetection
-  photons          screens photons               (dot product result)
+VCSEL 阵列 → DiSubPc·C70 热筛 (242°C) → CMOS+APD 探测器阵列
+    ↑                ↑                        ↑
+  Q 编码光子     光热 Δn 筛选             直接光电探测
+                光子穿过热筛             (点积结果)
 ```
 
-The key insight: **light serves dual purpose** — it carries Q-encoded signals AND heats the photothermal layer to its quantum coherent beating window (242°C), where DiSubPc·C70 undergoes singlet↔triplet oscillations that modulate refractive index. No external heaters needed.
+核心物理: **光子复用** — 一个光子脉冲穿过 D 个调制点, 完成 D 次乘法.
+光同时做两件事: 承载 Q 编码信号 + 加热光热层至量子相干拍频窗口 (242°C).
 
-## Six Engineering Questions
+## 六问结果
 
-| # | Question | Finding | Status |
-|---|----------|---------|:------:|
-| 1 | Can VCSEL light alone maintain 242°C? | ~16W auxiliary heating needed (solvable) | ⚠️ |
-| 2 | Is 0.033Hz weight update viable? | Yes for static-weight inference; not for training | ✅ |
-| 3 | Detector SNR after fan-out splitting? | Si APD M=20 recovers SNR to >18dB at D=2048 | ✅ |
-| 4 | ADC architecture scaling? | Row-sequential pulsed readout: D ADCs, not D² | ✅ |
-| 5 | Energy per dot product vs H100? | 0.6 fJ (optical) / 17 fJ (system) vs 2.9 nJ (H100) | ✅ |
-| 6 | Experimental feasibility path? | $15K, 4 weeks for first demonstration | ⚠️ |
+| # | 工程问题 | 结论 | 状态 |
+|---|---------|------|:--:|
+| 1 | VCSEL 光能否自维持 242°C? | 需约 16W 辅助加热 (可优化) | ⚠️ |
+| 2 | 0.033Hz 权重更新是否可行? | 推理场景可行; 训练/多租户不行 | ✅ |
+| 3 | 扇出后探测器 SNR 够吗? | Si APD M=20 → D=2048 时 SNR>18dB | ✅ |
+| 4 | ADC 架构如何扩展? | 逐行脉冲 D 列并行: D 个 ADC, 非 D² | ✅ |
+| 5 | 每点积能耗 vs H100? | 0.6 fJ (纯光学) / 17 fJ (系统) vs 2.9 nJ (H100) | ✅ |
+| 6 | 实验可行性? | $15K, 4 周起; 4×4 阵列是关键里程碑 | ⚠️ |
 
-## Key Results (D=2048)
+## 核心数字 (D=2048)
 
-| Metric | Value |
-|--------|-------|
-| Pure optical energy per D-dim dot product | **0.6 fJ** (5M× vs H100) |
-| System energy (with ADC + detectors) | **17 fJ** (170K× vs H100) |
-| System power | ~707 W |
-| Dot products per second | 41.9 Pops/s |
-| CMOS temperature (50μm gap + cooling) | 107°C |
+| 指标 | 值 |
+|------|-----|
+| 纯光学每 D 维点积能耗 | **0.6 fJ** (5M× vs H100) |
+| 含 ADC+探测器系统能耗 | **17 fJ** (170K× vs H100) |
+| 系统总功耗 | ~707 W |
+| 每秒点积数 | 41.9 Pops/s |
+| CMOS 温度 (50μm 间隙+冷却) | 107°C |
 | SNR (APD M=20) | 18 dB |
+| 光子复用效率 | 1 光子 (0.0002 fJ) 做 2048 次乘法 |
 
-## Honest Assessment
+## 灵敏度分析
 
-- **Physically sound**: photon reuse for attojoule dot products is real, grounded in Maxwell's equations
-- **Architecture is novel**: free-space thermal sieve vs waveguide MZI (Xidian PTC) vs passive diffraction (Gezhi OGPU)
-- **Not a universal processor**: weight-static inference only (0.033Hz update). Training, LoRA, multi-tenant switching not supported.
-- **Amdahl's law applies**: attention is ~3% of autoregressive transformer FLOPs. System-level speedup ~1×. Value is in energy-per-attention-op, not end-to-end throughput.
-- **Experimental gap**: all simulation, no hardware. First demonstration: VCSEL + DiSubPc·C70 film + APD (~$15K, 4 weeks).
+影响系统能效最大的三个参数:
+1. **ADC FOM** — 从 50→15 fJ/conv 可提升 3× 能效
+2. **探测器功耗** — 从 0.1→0.01 mW/像素 可提升 5× 能效
+3. **VCSEL 墙插效率** — 从 40%→80% 可提升 2× 能效
 
-## Run
+## D 标度律
+
+| D | 系统能耗 | vs H100 | SNR | ENOB | 总功耗 |
+|:--:|:-------:|:-------:|:---:|:----:|:-----:|
+| 128 | 3 fJ | 82K× | 38 dB | 6.1b | 3W |
+| 256 | 4 fJ | 104K× | 34 dB | 5.3b | 11W |
+| 512 | 6 fJ | 124K× | 29 dB | 4.5b | 44W |
+| 1024 | 10 fJ | 141K× | 24 dB | 3.6b | 177W |
+| 2048 | 17 fJ | 170K× | 18 dB | 2.7b | 707W |
+
+**D=512–1024 是能效-精度的甜点.**
+
+## 诚实评估
+
+- **物理自洽**: 光子复用的 attojoule 优势是 Maxwell 方程给的, 不是工程吹嘘
+- **架构新颖**: 自由空间热筛 vs 波导 MZI (西电 PTC) vs 被动衍射 (Gezhi OGPU)
+- **不是通用处理器**: 仅适合权重静态推理 (0.033Hz 更新). 训练/LoRA/多租户不支持
+- **Amdahl 定律限制**: 自回归推理中注意力只占层 3%, 全系统加速 ~1×. 价值在注意力能耗, 不在端到端吞吐
+- **仿真到实验的鸿沟**: 全部仿真, 无硬件. 第一个实验: VCSEL + DiSubPc·C70 + APD ($15K, 4 周)
+
+## 与其他光子路线对比 (D=512)
+
+| 路线 | 能耗/点积 | 权重更新 | 成熟度 |
+|------|:--------:|:--------:|:-----:|
+| **热光混合 (本工作)** | **6 fJ** | 30s (热) | 仿真 |
+| MZI 电光 (西电 PTC) | 10 fJ | ~μs | 芯片演示 |
+| 被动衍射 (Gezhi) | 0.1 fJ | 不可更新 | 芯片演示 |
+| SLM 自由空间 (FAST-ONN) | 100 fJ | ~ms | 实验室 |
+
+## 运行
 
 ```bash
 conda activate meep_env
 python engineering_validation.py
 ```
 
-## Context
+## 背景
 
-This analysis was conducted as an independent review of the photonic transformer architecture described in [photonic-attention](https://github.com/administere/photonic-attention) (Wayne, 2026). The goal was to identify and quantify engineering challenges before tapeout — maintaining architectural consistency while stress-testing physical assumptions.
+本分析是对 [photonic-attention](https://github.com/administere/photonic-attention) (Wayne, 2026) 中光子 Transformer 架构的独立工程审查.
+目标: 在流片前识别和量化工程挑战 — 保持架构一致性, 压力测试物理假设.
 
-## Author
+## 作者
 
-Claude (Anthropic) — independent engineering analysis.
+Claude (Anthropic) — 独立工程分析.
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+🤖 由 [Claude Code](https://claude.com/claude-code) 生成
