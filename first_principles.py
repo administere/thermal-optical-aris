@@ -45,7 +45,14 @@ print(f"{'─'*70}")
 D = 2048
 lam = 850e-9
 P_vcsel = 5e-3
-T_pulse = 1/10e9
+# v5: 调制机制决定时钟频率
+#   热 Δn: ~0.08 Hz (MOESM7 τ≈2s)
+#   电子布居: ~0.24 GHz (MOESM8 τ_decay≈4.2ns)
+#   量子拍频: 17.6 GHz (MOESM2 S₁↔¹TT 相干振荡)
+#   经典保守取 0.24 GHz; 量子理论上限 17.6 GHz
+T_pulse_classical = 1/0.24e9
+T_pulse_quantum = 1/17.6e9
+T_pulse = T_pulse_classical  # 保守估计
 E_pulse = P_vcsel * T_pulse
 E_photon = h * c / lam
 N_photons = E_pulse / E_photon
@@ -137,7 +144,11 @@ R = 0.55  # A/W
 I_sig = P_per_det * R
 
 # 量子极限: 散粒噪声
-BW = 10e9
+# v5: BW 受限于激发态衰减 (MOESM8 τ_decay≈4.2ns)
+#   量子极限 BW 可达 17.6 GHz (量子相干拍频)
+BW_classical = 0.24e9   # 激发态衰减限制
+BW_quantum = 17.6e9     # 量子拍频理论上限
+BW = BW_classical       # 保守估计
 shot_noise = np.sqrt(2 * q * I_sig * BW)
 
 # 热噪声 (TIA 反馈电阻)
@@ -186,13 +197,13 @@ print(f"{'─'*70}")
 
 # 但光子也有损耗:
 # - 激光 WPE: ~40-60%
-# - 光热层吸收: ~60%
+# - 光热层吸收: ~30% (v5 MOESM6 乌尔巴赫外推, was 60%)
 # - 探测器量子效率: ~55%
 # - ADC 量化: ~50 fJ/conv
 
 # 链式能耗:
 # 电 → 光: E_elec = E_optical / WPE
-# 光 → 光热层透射: E_transmitted = E_optical × 0.5 × 0.4 = 0.2 E_optical
+# 光 → 光热层透射: E_transmitted = E_optical × 0.5 × 0.7 = 0.35 E_optical (v5: abs~30%)
 # 光 → 光电流: E_detected = E_transmitted × 0.55 (不相关, 功率转换)
 # 光电流 → 数字: E_digital = E_ADC
 

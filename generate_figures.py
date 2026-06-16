@@ -74,8 +74,13 @@ def fig_d_scaling():
     h, c = 6.626e-34, 3e8
     E_photon_850nm = h * c / 850e-9
     P_vcsel = 5e-3
-    f_clock = 10e9
+    # v5: 三种调制机制对应不同时钟
+    #   热 Δn: ~0.08 Hz, 电子布居: ~0.24 GHz, 量子拍频: 17.6 GHz
+    #   保守取激发态衰减限制: 0.24 GHz
+    f_clock = 0.24e9  # was 10e9, MOESM8 τ_decay≈4.2ns
+    f_clock_quantum = 17.6e9  # MOESM2 量子相干拍频 (理论上限)
     E_pulse = P_vcsel / f_clock
+    E_pulse_quantum = P_vcsel / f_clock_quantum
     E_optical_per_D = [E_pulse / D for D in D_vals]
 
     # System energy: optical + ADC + detector overhead

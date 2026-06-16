@@ -99,8 +99,7 @@ class ChipParams:
     #   电子布居: ~0.24 GHz (MOESM8 τ_decay≈4.2ns)
     #   量子拍频: ~17.6 GHz (MOESM2 相干振荡)
     f_clock_GHz: float = 0.24          # was 10.0 — 基于激发态衰减限制
-    f_weight_Hz: float = 0.5           # was 0.033 — MOESM7 实测热响应
-    f_weight_Hz: float = 0.033       # 权重更新频率
+    f_weight_Hz: float = 0.5           # was 0.033 — MOESM7 实测热 τ≈2s
 
     # 工艺
     defect_density_cm2: float = 1.0  # 缺陷密度 (/cm²)
@@ -1076,7 +1075,7 @@ class CompetitiveAnalysis:
                 ],
                 'unique_challenges': [
                     '242°C 工作温度 — 需要特殊封装和热管理',
-                    '0.033Hz 权重更新 — 仅适合静态推理',
+                    '0.5Hz 权重更新 (MOESM7 τ≈2s) — 仅适合静态推理',
                     '有机材料长期稳定性未知',
                     '无硬件演示 — 全部仿真',
                 ],
