@@ -102,9 +102,67 @@ D=512–1024 这个区间在能效和精度之间取得了最好的平衡。
 ## 运行
 
 ```bash
+# DiSubPc·C70 热筛验证
 conda activate meep_env
 python engineering_validation.py
+
+# MZI 网格热-光耦合仿真
+python scripts/validate_single_mzi.py      # Level 1: 单 MZI
+python scripts/validate_thermal_2d.py      # Level 2: 2D 热求解器
+python scripts/validate_clements.py        # Level 3: Clements 网格
+python scripts/validate_svd.py             # Level 4: SVD 引擎
+python scripts/run_benchmark.py            # 完整基准测试
 ```
+
+## MZI 网格热-光耦合仿真包 (`mzi_mesh/`)
+
+> COMSOL 等效替代：2D 有限差分热求解器 + 解析传输矩阵光学
+
+构建了波导集成 MZI 网格的完整电-热-光耦合仿真框架，模拟 **电功率 → 焦耳热 → 温度分布 → Δn → 相移 → 光学传输矩阵** 的完整物理链。
+
+### 物理模块
+
+| 模块 | 文件 | 功能 |
+|------|------|------|
+| MZI 传输矩阵 | `mzi.py` | Clements 约定 T(θ,φ) = [[cosθ, -e^{-iφ}sinθ], [e^{iφ}sinθ, cosθ]] |
+| 热光移相器 | `phase_shifter.py` | V → ΔT → Δn → Δφ，1D 分析热阻模型 |
+| **2D 热求解器** | `thermal_2d.py` | ★ 有限差分稳态热方程，热串扰矩阵 C_{ij} |
+| Clements 网格 | `clements_mesh.py` | N×N 酉矩阵分解/合成，N(N-1)/2 MZI |
+| SVD 引擎 | `svd_engine.py` | 一般矩阵 M = U Σ V† |
+| 保真度分析 | `fidelity.py` | 热串扰下矩阵保真度 ℱₐ、有效 bit 精度 |
+
+### 关键数字（SOI 平台，1550 nm）
+
+| 指标 | 值 |
+|------|-----|
+| Pπ（π 相移功耗） | **6.8 mW** |
+| 75 μm 间距 → 热串扰 | α = 6.8%，有效 5.7 bit |
+| 127 μm 间距 → 热串扰 | α = 1.6%，有效 7.7 bit |
+| 200 μm 间距 → 热串扰 | α = 0.3%，有效 10.1 bit |
+| 4×4 Clements 网格 @ 127 μm | ℱₐ = **0.9867** |
+| N≤16 酉矩阵重建保真度 | ℱₐ = **1.000000** (无串扰) |
+
+### 5 级验证体系
+
+| Level | 验证内容 | 状态 |
+|:-----:|---------|:----:|
+| 1 | 单 MZI — 酉性, bar/cross/3dB, 往返 | ✅ |
+| 2 | 2D 热求解器 — 网格收敛, 串扰衰减, 对称性 | ✅ |
+| 3 | Clements 网格 — 单位阵重建, N=2/3/4/8/16 随机酉矩阵 | ✅ |
+| 4 | SVD 引擎 — 一般矩阵重建, 矩阵-向量乘法 | ✅ |
+| 5 | 热-光耦合 — ℱₐ vs MZI 间距, 有效 bit 精度 | ✅ |
+
+### 架构差异：两条热光路线
+
+| | 热筛（本工作主架构） | MZI 网格（本包） |
+|---|---|---|
+| **物理实现** | 自由空间 DiSubPc·C70 | 波导集成 Si/SiO₂ SOI |
+| **调制机制** | 光热 Δn 筛选 | 热光移相器 |
+| **工作温度** | 242°C (量子相干拍频) | ~300-400 K (局部加热) |
+| **权重更新** | ~30 s (热弛豫) | ~μs (电光/热光) |
+| **能效** | 0.6 fJ/点积 (纯光学) | ~10 fJ/MAC (含系统) |
+| **成熟度** | 仿真 | 芯片演示 |
+| **仿真方法** | Python 分析模型 | **本包: 2D FD + 传输矩阵** |
 
 ## 背景
 
