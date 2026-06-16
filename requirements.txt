@@ -1,0 +1,6 @@
+numpy>=1.24.0
+scipy>=1.10.0
+matplotlib>=3.7.0
+openpyxl>=3.1.0
+# meep — 系统级安装，非 pip
+# 详见 README 运行环境章节
