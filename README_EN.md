@@ -125,6 +125,18 @@ In v5, clock frequency dominates sensitivity:
 - **Amdahl's law applies**: attention accounts for ~3% of per-layer FLOPs in autoregressive inference. Value is in attention energy reduction, not end-to-end throughput.
 - **Simulation-to-experiment gap**: all results are simulation-based; no hardware yet. First priority experiment: 850nm film absorption measurement.
 
+## Design Boundary: Current Target vs Future Vision
+
+The core validation target of this repository is the **simplest thermal sieve structure**:
+```
+VCSEL → free-space → thermal sieve film → free-space → APD detector
+```
+No waveguides, no couplers, no external heaters. The design principle is **extreme efficiency with minimal elements**.
+
+The user's constant-temperature oven all-optical CPU concept (gradient oven + WDM photonic bus + vertical coupling + micro-instruction execution) is a long-term evolutionary direction, documented as an independent exploration in `oven_architecture_validation.py`, but is **not** the current experimental validation target. Each step up in complexity must be individually justified by experiment.
+
+Detailed design boundary discussion: [PRIOR_ART.md](PRIOR_ART.md) §3.
+
 ## Comparison with Other Photonic Approaches (D=512)
 
 ![Energy Comparison](figures/energy_comparison.png)
