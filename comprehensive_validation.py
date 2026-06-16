@@ -1063,8 +1063,8 @@ class CompetitiveAnalysis:
     def radar_chart_data(self) -> Dict:
         """技术路线对比的雷达图数据 (0-10 scale)"""
         return {
-            'dimensions': ['能效', '精度', '可重构性', '成熟度', '可扩展性', '成本'],
-            '热光混合 (本工作)':  [9, 5, 2, 2, 7, 8],
+            'dimensions': ['Energy Eff.', 'Precision', 'Reconfigurability', 'Maturity', 'Scalability', 'Cost'],
+            'Thermal-Optical (This Work)':  [9, 5, 2, 2, 7, 8],
             'Xidian PTC':         [8, 7, 8, 5, 6, 4],
             'Gezhi OGPU':         [10, 6, 0, 5, 9, 7],
             'Lightmatter Envise': [7, 8, 7, 6, 5, 3],

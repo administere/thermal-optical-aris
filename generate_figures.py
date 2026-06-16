@@ -39,6 +39,14 @@ plt.rcParams.update({
     'axes.grid': True,
     'grid.alpha': 0.3,
     'figure.facecolor': 'white',
+    # CJK font fallback: DejaVu Sans covers Latin/Greek/subscripts (C₇₀, Δn, ℃),
+    # WenQuanYi Micro Hei covers Chinese characters (量⼦, 热光, etc.).
+    'font.family': 'sans-serif',
+    'font.sans-serif': ['DejaVu Sans', 'WenQuanYi Micro Hei',
+                         'Bitstream Vera Sans', 'Computer Modern Sans Serif',
+                         'Lucida Grande', 'Verdana', 'Geneva', 'Lucid',
+                         'Arial', 'Helvetica', 'Avant Garde', 'sans-serif'],
+    'axes.unicode_minus': False,
 })
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'figures')
@@ -219,7 +227,7 @@ def fig_radar():
     fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
 
     colors_list = {
-        '热光混合 (本工作)': COLORS['primary'],
+        'Thermal-Optical (This Work)': COLORS['primary'],
         'Xidian PTC': COLORS['secondary'],
         'Gezhi OGPU': COLORS['tertiary'],
         'Lightmatter Envise': COLORS['warn'],
@@ -231,8 +239,8 @@ def fig_radar():
             continue
         values_plot = values + values[:1]
         color = colors_list.get(label, '#999999')
-        lw = 2.5 if '本工作' in label else 1.2
-        alpha = 0.9 if '本工作' in label else 0.5
+        lw = 2.5 if 'This Work' in label else 1.2
+        alpha = 0.9 if 'This Work' in label else 0.5
         ax.fill(angles, values_plot, alpha=0.05, color=color)
         ax.plot(angles, values_plot, 'o-', linewidth=lw, label=label,
                 color=color, markersize=4, alpha=alpha)
