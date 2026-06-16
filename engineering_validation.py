@@ -20,7 +20,15 @@ from typing import Dict, List, Tuple
 # ============================================================
 @dataclass
 class P:
-    """物理参数 — 全部可溯源"""
+    """物理参数 — 全部可溯源
+
+    v5 更新 (2026-06-16): 基于 Nature Photonics 补充材料 (MOESM1-8) 的测量数据
+      - film_abs: 0.60→0.30 (MOESM6 乌尔巴赫外推, α_850≈350 cm⁻¹)
+      - alpha_cm: 2000→350 cm⁻¹ (同上)
+      - f_weight_Hz: 0.033→0.5 (MOESM7 实测热 τ≈2s)
+      - f_clock_GHz: 10→0.24 (MOESM8 激发态衰减 τ≈4.2ns)
+      - BW_GHz: 10→1.0 (根据调制带宽限制)
+    """
     D: int = 2048
     pitch_um: float = 30.0
     film_um: float = 10.0
@@ -29,7 +37,9 @@ class P:
     P_vcsel_mW: float = 5.0
     vcsel_WPE: float = 0.40
     film_IL_dB: float = 3.0
-    film_abs: float = 0.60
+    # v5: MOESM6 乌尔巴赫外推 → α_850≈350 cm⁻¹ → 10μm 薄膜吸收率≈30%
+    film_abs: float = 0.30   # was 0.60
+    alpha_cm: float = 350.0   # was 2000, 溯源: MOESM6 Fig 2b 消光系数 + 乌尔巴赫带尾模型
     T_amb: float = 300.0
     T_op: float = 515.0
     T_cmos_max: float = 400.0
@@ -42,13 +52,17 @@ class P:
     APD_M: float = 20.0
     APD_F: float = 2.5
     Id_nA: float = 5.0
-    BW_GHz: float = 10.0
+    # v5: MOESM8 Fig 5d 激发态衰减 τ≈4.2ns → BW≈0.24GHz
+    #      量子相干拍频 (17.6 GHz) 非经典调制速率
+    BW_GHz: float = 1.0     # was 10.0
     TIA_pA: float = 3.0
     adc_FOM_fJ: float = 50.0
     adc_bits: int = 8
     adc_GHz: float = 10.0
-    f_clock_GHz: float = 10.0
-    f_weight_Hz: float = 0.033
+    # v5: MOESM7 Fig 4a 实测热 τ≈2s → BW_thermal≈0.5Hz
+    #      调制带宽取决于调制机制: 热(~0.5Hz) vs 电子(~0.24GHz) vs 量子拍频(~17.6GHz)
+    f_clock_GHz: float = 0.24   # was 10.0, 基于激发态寿命限制
+    f_weight_Hz: float = 0.5    # was 0.033, 基于 MOESM7 实测热 τ≈2s
 
     @property
     def h(self): return 6.626e-34
@@ -208,13 +222,14 @@ def noise_budget(p: P) -> Dict:
         ('暗电流散粒噪声', s_dark*1e9),
         ('RIN (激光)', s_RIN*1e9),
     ]
-    s_total = np.sqrt(sum(s**2 for _, s in noise_items))
-    snr = 10*np.log10((I_apd/s_total)**2) if I_apd>0 else -99
+    s_total_nA = np.sqrt(sum(s**2 for _, s in noise_items))
+    I_apd_nA = I_apd * 1e9
+    snr = 10*np.log10((I_apd_nA / s_total_nA)**2) if I_apd_nA > 0 else -99
 
     return {
-        'I_sig_nA': I_apd*1e9,
+        'I_sig_nA': I_apd_nA,
         'noise_items_nA': noise_items,
-        's_total_nA': s_total*1e9,
+        's_total_nA': s_total_nA,
         'SNR_dB': snr,
         'thermal_limited': s_therm > s_shot_apd,
     }

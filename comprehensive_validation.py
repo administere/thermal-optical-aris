@@ -36,21 +36,39 @@ sigma_SB = 5.670374419e-8  # Stefan-Boltzmann (W/m²·K⁴)
 # ============================================================
 @dataclass
 class ChipParams:
-    """芯片级参数 — 从 Nature Photonics 论文和工程实践溯源"""
+    """芯片级参数 — 从 Nature Photonics 论文和工程实践溯源
+
+    v5 更新 (2026-06-16): 基于 MOESM1-8 补充实验数据的参数校准
+    """
     # 阵列
     D: int = 512                     # 阵列维度
     pitch_um: float = 30.0           # 像素间距 (μm)
 
     # 光热层 (DiSubPc·C70 共晶)
+    # 晶体学 (MOESM5 CIF): 单斜 Cc, a=49.716Å, b=11.035Å, c=21.540Å, β=103.5°
+    # 非中心对称极性空间群 — 关键: 支持 χ⁽²⁾ 非线性和量子相干态混合
     film_um: float = 10.0            # 薄膜厚度 (μm)
     n_film: float = 1.8              # 折射率 @850nm
     dn_dT: float = -1.0e-4           # 热光系数 (/K) — 有机半导体典型值
-    alpha_cm: float = 2.0e3          # 吸收系数 (cm⁻¹) @850nm — 匹配 60% 吸收
+    # v5: MOESM6 Fig 2b 乌尔巴赫带尾外推 → α(850nm)≈350 cm⁻¹
+    #      光学带隙 E_g=2.25eV(551nm) → 850nm(1.46eV) 低于带隙
+    #      Δ 吸收依靠 CT 带尾，而非直接带间跃迁
+    alpha_cm: float = 350.0          # 吸收系数 (cm⁻¹) @850nm (was 2000)
     k_film: float = 0.15             # 热导率 (W/m·K) — 有机材料
-    rho_film: float = 1500.0         # 密度 (kg/m³)
+    rho_film: float = 1581.0         # 密度 (kg/m³) — MOESM5 CIF, 晶体学测定
     cp_film: float = 1200.0          # 比热容 (J/kg·K)
     T_op: float = 515.0              # 工作温度 (K) = 242°C
     T_amb: float = 300.0             # 环境温度 (K)
+    # v5: MOESM7 Fig 4a 实测热时间常数 τ≈2s (was 30s)
+    tau_thermal_s: float = 2.0       # 热时间常数 (s) — MOESM7 升温曲线 63.2% 上升点
+    # v5: MOESM8 Fig 5d 激发态布居衰减 τ_decay≈4.2ns (1/e)
+    tau_decay_ns: float = 4.2        # 激发态衰减 (ns) — 2DiSubPc-C70 @300K
+    # v5: 量子相干拍频 17.6 GHz (MOESM2 审稿人回复, Fig R5)
+    f_quantum_beat_GHz: float = 17.6  # 量子相干拍频 (GHz)
+    # v5: MOESM1 Table S3 PL 寿命分量
+    pl_tau1_ns: float = 0.73         # PL τ₁ (ns) — 辐射分量
+    pl_tau2_ns: float = 4.96         # PL τ₂ (ns) — 热激活分量 @300K
+    pl_A2_frac: float = 0.845        # τ₂ 的振幅占比 @300K
 
     # VCSEL 光源
     lam_nm: float = 850.0            # 波长 (nm)
@@ -64,7 +82,7 @@ class ChipParams:
     APD_F: float = 0.0               # 0 表示用 M^0.3 计算
     Id_nA: float = 5.0               # 暗电流 (nA)
     TIA_pA_rtHz: float = 3.0         # TIA 输入噪声密度 (pA/√Hz)
-    BW_GHz: float = 10.0             # 带宽 (GHz)
+    BW_GHz: float = 1.0              # 带宽 (GHz) — v5: 激发态衰减限制 τ≈4.2ns→0.24GHz
 
     # 间隙层
     gap_um: float = 50.0             # 光热层-CMOS 间隙 (μm)
@@ -76,7 +94,12 @@ class ChipParams:
     adc_GHz: float = 10.0            # 采样率
 
     # 时钟
-    f_clock_GHz: float = 10.0
+    # v5: 调制机制决定时钟频率
+    #   热 Δn: ~0.5 Hz (MOESM7 τ≈2s)
+    #   电子布居: ~0.24 GHz (MOESM8 τ_decay≈4.2ns)
+    #   量子拍频: ~17.6 GHz (MOESM2 相干振荡)
+    f_clock_GHz: float = 0.24          # was 10.0 — 基于激发态衰减限制
+    f_weight_Hz: float = 0.5           # was 0.033 — MOESM7 实测热响应
     f_weight_Hz: float = 0.033       # 权重更新频率
 
     # 工艺
