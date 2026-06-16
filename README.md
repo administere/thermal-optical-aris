@@ -108,8 +108,6 @@ python engineering_validation.py
 本分析是对 [photonic-attention](https://github.com/administere/photonic-attention) (Wayne, 2026) 中光子 Transformer 架构的独立工程审查.
 目标: 在流片前识别和量化工程挑战 — 保持架构一致性, 压力测试物理假设.
 
-## 作者
 
-Claude (Anthropic) — 独立工程分析.
+想法阶段
 
-🤖 由 [Claude Code](https://claude.com/claude-code) 生成
