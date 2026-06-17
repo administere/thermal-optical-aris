@@ -3,3 +3,9 @@ __pycache__/
 *.cif:Zone.Identifier
 *.pdf:Zone.Identifier
 outreach/
+
+# ARIS 自动化科研环境 — 不提交 symlink 和运行时文件
+.claude/skills/
+.aris/
+.aris/meta/
+.claude/settings.local.json

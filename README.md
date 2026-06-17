@@ -294,6 +294,46 @@ conda install -c conda-forge pymeep
 | `meep` | FDTD 全波电磁仿真（仅 `FDTD光学验证.py` 需要） |
 | `openpyxl` | 读取 Nature Photonics MOESM6 Excel 数据（仅 `吸收分析.py` 需要） |
 
+## ARIS 自动化科研环境 🔬
+
+本项目集成了 [ARIS (Auto-Research-In-Sleep)](https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep)，一个由上海交大团队开源的 AI 科研自动化系统。80 个科研 skills 覆盖文献调研、idea 发现、实验规划、自动审稿、论文写作全流程。
+
+### 一键安装
+
+```bash
+bash setup-aris.sh
+```
+
+这会自动克隆 ARIS、安装 skills、配置 Python 依赖。**不需要 GPU，不需要 API key。**
+
+### 启动
+
+```bash
+claude
+```
+
+进入 Claude Code 后，所有 ARIS skills 自动可用：
+
+| 命令 | 用途 |
+|------|------|
+| `/research-lit "主题"` | 文献调研 |
+| `/idea-discovery "方向"` | 找创新点 |
+| `/research-pipeline "方向"` | 全流程自动化 |
+| `/auto-review-loop "论文"` | 自动审稿循环 |
+| `/paper-writing "报告"` | 写论文 |
+
+### 可复用的分析链路
+
+这个项目的分析脚本不限于 DiSubPc·C70。换任何新材料，链路是一样的：
+
+```
+吸收分析.py → 调制机制.py → 工程验证.py → 能量对比v2.py
+     ↓              ↓              ↓              ↓
+  外推吸收系数    三种调制机制    核心工程分析    5 方案能耗对比
+```
+
+> 这套分析链路 + ARIS skills + CLAUDE.md = 一个完整的自动化光计算材料验证环境。
+
 ---
 
 ## 关于这个项目
